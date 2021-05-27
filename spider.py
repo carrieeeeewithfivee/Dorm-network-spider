@@ -27,12 +27,20 @@ class GetDataSpider(scrapy.Spider):
         indata = response.css("tr.in > td::text").extract()[0:2]
         outdata = response.css("tr.out > td::text").extract()[0:2]
         number = []
+        #special case, might be kb
+        change_unit1 = 1
+        change_unit2 = 1
+        if ('kb/秒' in indata[0]):
+            change_unit1 = 1000
+        if ('kb/秒' in outdata[0]):
+            change_unit2 = 1000
+
         for string in indata:
             number.extend(re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?", string))
         for string in outdata:
             number.extend(re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?", string))
         global dorms
-        dorms[info['name'][-1].strip()] = [float(number[0]), float(number[4]), float(number[1]), float(number[5]), float(number[3]), float(number[7])]
+        dorms[info['name'][-1].strip()] = [float(number[0])/change_unit1, float(number[4])/change_unit2, float(number[1]), float(number[5]), float(number[3]), float(number[7])]
 
 c = CrawlerProcess({})
 c.crawl(GetDataSpider)
